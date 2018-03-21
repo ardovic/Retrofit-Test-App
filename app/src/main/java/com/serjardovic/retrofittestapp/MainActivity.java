@@ -5,21 +5,23 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.TextView;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements Callback<PageData> {
+public class MainActivity extends AppCompatActivity implements Callback<WeatherData> {
 
-    private RecyclerView recyclerView;
-    private RecyclerView.LayoutManager layoutManager;
-    private RecyclerAdapter recyclerAdapter;
+    public static final String API_KEY = "1780541fd97c219bcb6b471152ad65c7";
+    public static final String CITY_AND_COUNTRY = "Moscow,RU";
 
-    private PageData pageData;
+    @BindView(R.id.text)
+    TextView textView;
+
+    private WeatherData weather;
     private ApiInterface apiInterface;
 
     @Override
@@ -27,51 +29,28 @@ public class MainActivity extends AppCompatActivity implements Callback<PageData
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
-        layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setHasFixedSize(true);
+        ButterKnife.bind(this);
+
 
         apiInterface = ApiClient.getApiClient().create(ApiInterface.class);
 
 
-        try {
+        Call<WeatherData> call = apiInterface.getWeatherData(CITY_AND_COUNTRY, API_KEY);
+        call.enqueue(this);
 
-            JSONObject paramObject = new JSONObject();
-            paramObject.put("page", 1);
-
-            Log.d("HEX", paramObject.toString());
-
-            Call<PageData> call = apiInterface.getPageData(paramObject.toString());
-
-            call.enqueue(this);
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
     }
 
 
     @Override
-    public void onResponse(Call<PageData> call, Response<PageData> response) {
+    public void onResponse(Call<WeatherData> call, Response<WeatherData> response) {
 
-        pageData = (PageData) response.body();
+        weather = (WeatherData) response.body();
 
-        Log.d("HEX", response.body()+"");
-        Log.d("HEX", response.toString());
-
-        Log.d("HEX", ""+pageData.getNextPage());
-        Log.d("HEX", ""+pageData.getCurrentPage());
-
-
-
-
-        //recyclerAdapter = new RecyclerAdapter(pageData);
-        //recyclerView.setAdapter(recyclerAdapter);
+        textView.setText(weather.toString());
     }
 
     @Override
-    public void onFailure(Call<PageData> call, Throwable t) {
+    public void onFailure(Call<WeatherData> call, Throwable t) {
 
     }
 }

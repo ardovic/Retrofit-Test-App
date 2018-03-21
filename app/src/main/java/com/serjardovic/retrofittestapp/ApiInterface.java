@@ -1,12 +1,13 @@
 package com.serjardovic.retrofittestapp;
 
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.POST;
+import retrofit2.http.GET;
+import retrofit2.http.Query;
 
 public interface ApiInterface {
 
-    @POST("images.php")
-    Call<PageData> getPageData(@Body String body);
+    @GET("/data/2.5/weather")
+    Call<WeatherData> getWeatherData(@Query("q") String cityAndCountry,
+                               @Query("appid") String appid);
 
 }
